@@ -117,7 +117,7 @@ class ContentLoss(_Loss):
                  weights: List[Union[float, torch.Tensor]] = [1.], replace_pooling: bool = False,
                  distance: str = "mse", reduction: str = "mean", mean: List[float] = IMAGENET_MEAN,
                  std: List[float] = IMAGENET_STD, normalize_features: bool = False,
-                 allow_layers_weights_mismatch: bool = False) -> None:
+                 allow_layers_weights_mismatch: bool = False, pretrained: bool = True) -> None:
 
         assert allow_layers_weights_mismatch or len(layers) == len(weights), \
             f'Lengths of provided layers and weighs mismatch ({len(weights)} weights and {len(layers)} layers), ' \
@@ -130,10 +130,10 @@ class ContentLoss(_Loss):
             self.layers = layers
         else:
             if feature_extractor == "vgg16":
-                self.model = vgg16(pretrained=True, progress=False).features
+                self.model = vgg16(pretrained=pretrained, progress=False).features
                 self.layers = [VGG16_LAYERS[l] for l in layers]
             elif feature_extractor == "vgg19":
-                self.model = vgg19(pretrained=True, progress=False).features
+                self.model = vgg19(pretrained=pretrained, progress=False).features
                 self.layers = [VGG19_LAYERS[l] for l in layers]
             else:
                 raise ValueError("Unknown feature extractor")
@@ -363,13 +363,13 @@ class LPIPS(ContentLoss):
         "photosynthesis.metrics/releases/download/v0.4.0/lpips_weights.pt"
 
     def __init__(self, replace_pooling: bool = False, distance: str = "mse", reduction: str = "mean",
-                 mean: List[float] = IMAGENET_MEAN, std: List[float] = IMAGENET_STD,) -> None:
+                 mean: List[float] = IMAGENET_MEAN, std: List[float] = IMAGENET_STD, pretrained: bool = True) -> None:
         lpips_layers = ['relu1_2', 'relu2_2', 'relu3_3', 'relu4_3', 'relu5_3']
         lpips_weights = torch.hub.load_state_dict_from_url(self._weights_url, progress=False)
         super().__init__("vgg16", layers=lpips_layers, weights=lpips_weights,
                          replace_pooling=replace_pooling, distance=distance,
                          reduction=reduction, mean=mean, std=std,
-                         normalize_features=True)
+                         normalize_features=True, pretrained=pretrained)
 
 
 class DISTS(ContentLoss):
