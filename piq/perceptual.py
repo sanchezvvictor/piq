@@ -132,9 +132,13 @@ class ContentLoss(_Loss):
             if feature_extractor == "vgg16":
                 self.model = vgg16(pretrained=pretrained, progress=False).features
                 self.layers = [VGG16_LAYERS[l] for l in layers]
+                if not pretrained:
+                    torch.save('vgg16_random.pt', self.model.state_dict())
             elif feature_extractor == "vgg19":
                 self.model = vgg19(pretrained=pretrained, progress=False).features
                 self.layers = [VGG19_LAYERS[l] for l in layers]
+                if not pretrained:
+                    torch.save('vgg19_random.pt', self.model.state_dict())
             else:
                 raise ValueError("Unknown feature extractor")
 
